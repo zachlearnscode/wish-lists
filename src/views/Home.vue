@@ -1,18 +1,19 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
-  </div>
+  <v-container :fluid="$vuetify.breakpoint.name == 'xs'">
+    <v-expansion-panels multiple>
+      <wish-list></wish-list>
+    </v-expansion-panels>
+  </v-container>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
+import WishList from "../components/WishList.vue";
 
 export default {
   name: "Home",
+
   components: {
-    HelloWorld,
-  },
+    WishList
+  }
 };
 </script>
