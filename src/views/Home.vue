@@ -1,19 +1,46 @@
 <template>
-  <v-container :fluid="$vuetify.breakpoint.name == 'xs'">
-    <v-expansion-panels multiple>
-      <wish-list></wish-list>
-    </v-expansion-panels>
+  <v-container fluid>
+    <v-row>
+      <v-col class="text-center">
+        Welcome to Wish List
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" sm="6" order-sm="2">
+        <v-form>
+          
+        </v-form>
+        <v-btn block>Log in</v-btn>
+      </v-col>
+      <v-col cols="12" sm="6" order-sm="1">
+         <v-btn block>Sign up</v-btn>
+       </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script>
-import WishList from "../components/WishList.vue";
+import { db } from "../firebase/config";
+import { collection, doc, setDoc } from "firebase/firestore";
+
+
 
 export default {
   name: "Home",
 
-  components: {
-    WishList
-  }
+  methods: {
+    async testFn() {
+      const testCollRef = collection(db, "testColl");
+
+      await setDoc(doc(testCollRef, "Good Night"), {
+        cruel: "World"
+      })
+      .catch(e => {
+        console.log(e)
+      })
+
+      return;
+    }
+  },
 };
 </script>
