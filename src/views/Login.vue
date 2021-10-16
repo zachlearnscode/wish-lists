@@ -1,7 +1,7 @@
 <template>
-
-     <credentials></credentials>
-  
+  <v-container>
+    <credentials></credentials>
+  </v-container>  
 </template>
 
 <script>
