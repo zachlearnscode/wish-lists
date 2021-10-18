@@ -5,23 +5,14 @@
         Welcome to Wish List
       </v-col>
     </v-row>
-    <v-row>
-      <v-col cols="12" sm="6" order-sm="2">
-        <v-form>
-          
-        </v-form>
-        <v-btn block>Log in</v-btn>
-      </v-col>
-      <v-col cols="12" sm="6" order-sm="1">
-         <v-btn block>Sign up</v-btn>
-       </v-col>
-    </v-row>
+    
   </v-container>
 </template>
 
 <script>
 import { db } from "../firebase/config";
 import { collection, doc, setDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 
 
@@ -42,5 +33,14 @@ export default {
       return;
     }
   },
+
+  beforeMount() {
+    if (!getAuth().currentUser) {
+      console.log("No current user")
+      this.$router.push("Login")
+    } else {
+      console.log(getAuth().currentUser)
+    }
+  }
 };
 </script>
