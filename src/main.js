@@ -24,17 +24,22 @@ export const firebaseConfig = {
 
 initializeApp(firebaseConfig);
 
-const auth = getAuth();
-export let currentUser = auth.currentUser;
-
-onAuthStateChanged(auth, (user) => {
-  return currentUser = user;
-});
-
 Vue.config.productionTip = false;
 
-new Vue({
-  router,
-  vuetify,
-  render: (h) => h(App),
-}).$mount("#app");
+var vue = null;
+export let currentUser = null;
+
+onAuthStateChanged(getAuth(), user => {
+  currentUser = user;
+
+  if (!vue) {
+    new Vue({
+      router,
+      vuetify,
+      render: (h) => h(App),
+    }).$mount("#app");    
+  }
+});
+
+
+

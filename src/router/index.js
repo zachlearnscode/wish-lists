@@ -3,21 +3,29 @@ import VueRouter from "vue-router";
 
 //Views
 import Login from "../views/Login.vue";
-// import Dashboard from "../views/Dashboard.vue";
+import Dashboard from "../views/Dashboard.vue";
+
+//Firebase User
+import { currentUser } from "../main";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "Login",
-    component: Login
+    name: "Dashboard",
+    component: Dashboard,
+    beforeEnter: (to, from, next) => {
+      console.log("Hello from Router", currentUser)
+      if (!currentUser) next('/login');
+      else next();
+    }
   },
-  // {
-  //   path: "/dashboard",
-  //   name: "Dashboard",
-  //   component: Dashboard,
-  // }
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+  }
 ];
 
 const router = new VueRouter({

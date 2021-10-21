@@ -7,8 +7,8 @@
       @password="password = $event"
       :confirmPassword="confirmPassword"
       @confirmPassword="confirmPassword = $event"
-      :firstName="firstName"
-      @firstName="firstName = $event"
+      :displayName="displayName"
+      @displayName="displayName = $event"
 
       @submit="submit($event)"
     ></credentials>
@@ -16,10 +16,10 @@
 </template>
 
 <script>
-import { currentUser } from "../main";
-
 import Credentials from "../components/Credentials.vue";
-import {getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+
+import { currentUser } from "../main";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default {
@@ -33,7 +33,7 @@ export default {
       password: "",
 
       confirmPassword: "",
-      firstName: "",
+      displayName: "",
     };
   },
 
@@ -53,7 +53,7 @@ export default {
           this.writeNewUserToFirestore();
         }
 
-        console.log(userCredential)
+        console.log("Hello from async submit(): ", userCredential)
         // this.$router.push('/dashboard');
       } catch(err) {
           console.log(err);
@@ -63,7 +63,7 @@ export default {
       const db = getFirestore();
 
       await setDoc(doc(db, 'users', this.email), {
-        name: this.firstName,
+        name: this.displayName,
         wishLists: []
       })
     }

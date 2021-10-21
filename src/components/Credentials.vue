@@ -31,9 +31,9 @@
     ></v-text-field>
 
     <v-text-field
-      :value="firstName"
-      v-model="firstName_local"
-      placeholder="First Name"
+      :value="displayName"
+      v-model="displayName_local"
+      placeholder="Display Name"
       outlined
     ></v-text-field>
     <v-btn type="submit" id="signup" block>Sign up</v-btn>
@@ -43,13 +43,13 @@
 <script>
 
 export default {
-  props: ["email", "password", "confirmPassword", "firstName"],
+  props: ["email", "password", "confirmPassword", "displayName"],
   data() {
     return {
       email_local: "",
       password_local: "",
       confirmPassword_local: "",
-      firstName_local: "",
+      displayName_local: "",
     };
   },
 
@@ -63,8 +63,8 @@ export default {
     confirmPassword_local() {
       this.$emit("confirmPassword", this.confirmPassword_local);
     },
-    firstName_local() {
-      this.$emit("firstName", this.firstName_local);
+    displayName_local() {
+      this.$emit("displayName", this.displayName_local);
     },
   },
 };
