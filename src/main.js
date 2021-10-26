@@ -11,6 +11,7 @@ import VeeValidate from 'vee-validate';
 
 //Firebase
 import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export const firebaseConfig = {
@@ -23,17 +24,19 @@ export const firebaseConfig = {
 };
 
 initializeApp(firebaseConfig);
+export const firebaseDB = getFirestore();
 
 Vue.config.productionTip = false;
 
 var vue = null;
 export let currentUser = null;
 
+//Don't initialize Vue instance until observer set on user status.
 onAuthStateChanged(getAuth(), user => {
   currentUser = user;
 
   if (!vue) {
-    new Vue({
+    vue = new Vue({
       router,
       vuetify,
       render: (h) => h(App),

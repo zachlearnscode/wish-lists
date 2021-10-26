@@ -13,11 +13,9 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: "/",
-    name: "Dashboard",
-    component: Dashboard,
+    component: Login,
     beforeEnter: (to, from, next) => {
-      console.log("Hello from Router", currentUser)
-      if (!currentUser) next('/login');
+      if (currentUser) next(`/dashboard/${currentUser.uid}`);
       else next();
     }
   },
@@ -25,6 +23,11 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+  },
+  {
+    path: "/dashboard/:userID",
+    component: Dashboard,
+    props: true
   }
 ];
 

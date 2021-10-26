@@ -4,6 +4,13 @@
 
 <script>
 export default {
+  props: ['userID'],
+
+  data() {
+    return {
+      user: null
+    }
+  },
 
 }
 </script>

@@ -13,6 +13,11 @@
             <v-list-item-title>{{ page }}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
+        <v-list-item link>
+          <v-list-item-content>
+            <v-list-item-title>{{currentUser ? 'Sign Out' : 'Sign In'}}</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 
@@ -23,11 +28,14 @@
 </template>
 
 <script>
+import { currentUser } from "../src/main";
+
 export default {
   name: "App",
 
   data() {
     return {
+      currentUser: currentUser,
       drawer: false,
       pages: ["Profile", "Wish List", "Pledges"]
     }
