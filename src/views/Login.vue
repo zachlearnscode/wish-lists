@@ -18,7 +18,7 @@
 <script>
 import Credentials from "../components/Credentials.vue";
 
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 export default {
@@ -38,7 +38,7 @@ export default {
 
   methods: {
     async submit(btnID) {
-      let userCredential, userID;
+      let userCredential, user;
       
       try {
         if (btnID === 'login') {
@@ -47,25 +47,32 @@ export default {
           userCredential = await createUserWithEmailAndPassword(getAuth(), this.email, this.password);
         }
       } catch(err) {
-          console.log("Error in Submit ", err);
+          console.log("Error submitting login/signup form: ", err);
       }
 
-      userID = userCredential.user.uid;
+      user = userCredential.user;
 
       if (btnID === "signup") {
-        this.writeNewUserToFirestore(userID);
+        updateProfile(getAuth().currentUser, {
+          displayName: this.displayName
+        }).then(() => {
+          this.writeNewUserToFirestore(userCredential.user)
+        }).catch(err => {
+          console.log("Error updating user profile with display name: ", err)
+        })
       }
 
-      return this.$router.push(`/dashboard/${userID}`);
+      return this.$router.push(`/dashboard/${user.uid}`);
     },
-    async writeNewUserToFirestore(uid) {
+    async writeNewUserToFirestore(user) {
       const db = getFirestore();
 
       try {
-        await setDoc(doc(db, 'users', uid), {
-          displayName: this.displayName,
-          groups: {},
-          wishLists: {}
+        await setDoc(doc(db, 'users', user.uid), {
+          displayName: user.displayName,
+          email: user.email,
+          wishlists: {},
+          groups: {}
         })
       } catch(err) {
         console.log("Error in writeNewUserToFirestore: ", err)
