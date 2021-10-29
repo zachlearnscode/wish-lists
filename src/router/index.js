@@ -6,7 +6,7 @@ import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 
 //Firebase User
-// import { currentUser } from "../main";
+import { currentUser } from "../main";
 
 Vue.use(VueRouter);
 
@@ -14,10 +14,10 @@ const routes = [
   {
     path: "/",
     component: Login,
-    // beforeEnter: (to, from, next) => {
-    //   if (currentUser) next(`/dashboard/${currentUser.uid}`);
-    //   else next();
-    // }
+    beforeEnter: (to, from, next) => {
+      if (currentUser) next(`/dashboard/${currentUser.uid}`);
+      else next();
+    }
   },
   {
     path: "/login",
