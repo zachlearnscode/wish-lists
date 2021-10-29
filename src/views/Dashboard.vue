@@ -2,7 +2,7 @@
   <v-container>
     <loader :loading="loading"></loader>
     <div v-if="!loading">
-      <v-card>
+      <v-card class="elevation-5">
         <v-card-title class="green">
           My Wishlists
           <v-spacer></v-spacer>
@@ -11,18 +11,23 @@
           </v-card-actions>
         </v-card-title>
         
-        
-        <v-list>
-          <v-list-item v-for="(wishlist, i) in wishlists" :key="i">
-            <v-list-item-content>
-              <v-list-item-title class="d-flex">
-                <span class="align-self-center">{{ wishlist.nickname }}</span>
-                <v-spacer></v-spacer>
-                <v-list-item-action><v-btn small icon><v-icon>mdi-chevron-right</v-icon></v-btn></v-list-item-action>
-              </v-list-item-title>
-              
-            </v-list-item-content>
-          </v-list-item>          
+        <v-list two-line>
+          <template v-if="Object.keys(wishlists).length">
+            <v-list-item v-for="(wishlist, i) in wishlists" :key="i">
+              <v-list-item-content>
+                <v-list-item-title>{{ wishlist.nickname }}</v-list-item-title>
+                <v-list-item-subtitle>Created: {{ wishlist.createdOn | formatDate }}</v-list-item-subtitle>                
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-btn @click="goToWishlist(wishlist.wishlistID)" small icon>
+                  <v-icon>mdi-chevron-right</v-icon>
+                </v-btn>
+              </v-list-item-action>
+            </v-list-item>          
+          </template>
+          <template v-else>
+            <div class="text-center grey--text text--lighten-1">No wishlists to display.</div>
+          </template>
         </v-list>        
       </v-card>
     </div>
@@ -31,7 +36,7 @@
 
 <script>
 import { firebaseDB } from "../main";
-import { doc, collection, addDoc, updateDoc,  onSnapshot, serverTimestamp } from "firebase/firestore";
+import { doc, collection, addDoc, updateDoc, onSnapshot } from "firebase/firestore";
 
 const setSnapshotListener = function(collection, document, callback) {
   return onSnapshot(doc(firebaseDB, collection, document), callback);
@@ -61,22 +66,33 @@ export default {
   methods: {
     async createNewWishlist() {
       const newWishlistRef = await addDoc(collection(firebaseDB, "wishlists"), {
-        createdBy: this.userID,
-        createdOn: serverTimestamp()
+        owner: this.userID
       })
 
-      this.addWishlistRefrenceToUserDoc(newWishlistRef);
+      this.addWishlistRefrenceToUserDoc(newWishlistRef, new Date().getTime());
     },
 
-    async addWishlistRefrenceToUserDoc(ref) {
+    async addWishlistRefrenceToUserDoc(ref, timestamp) {
       const userDocRef = doc(firebaseDB, "users", this.userID);
 
       await updateDoc(userDocRef, {
-        ['wishlists.' + `${ref.id}`]: {
+        ['wishlists.' + `${timestamp}`]: {
+          wishlistID: ref.id,
           path: ref.path,
-          nickname: "Wishlist " + (Object.keys(this.wishlists).length + 1)
+          createdOn: timestamp,
+          nickname: "Untitled Wishlist",
         }
       })
+    },
+
+    goToWishlist(wishlistID) {
+      this.$router.push({ path: `/wishlist/${wishlistID}` });
+    }
+  },
+
+  filters: {
+    formatDate(timestamp) {
+      return new Date(timestamp).toString()
     }
   },
 

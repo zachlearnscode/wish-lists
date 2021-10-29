@@ -4,6 +4,8 @@ import VueRouter from "vue-router";
 //Views
 import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
+import Wishlist from "../views/Wishlist.vue";
+
 
 //Firebase User
 import { currentUser } from "../main";
@@ -27,6 +29,11 @@ const routes = [
   {
     path: "/dashboard/:userID",
     component: Dashboard,
+    props: true
+  },
+  {
+    path: "/wishlist/:wishlistID",
+    component: Wishlist,
     props: true
   }
 ];
