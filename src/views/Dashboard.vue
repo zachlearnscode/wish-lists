@@ -16,10 +16,10 @@
             <v-list-item v-for="(wishlist, i) in wishlists" :key="i">
               <v-list-item-content>
                 <v-list-item-title>{{ wishlist.nickname }}</v-list-item-title>
-                <v-list-item-subtitle>Created: {{ wishlist.createdOn | formatDate }}</v-list-item-subtitle>                
+                <v-list-item-subtitle>Created: {{ wishlist.created | formatDate }}</v-list-item-subtitle>                
               </v-list-item-content>
               <v-list-item-action>
-                <v-btn @click="goToWishlist(wishlist.wishlistID)" small icon>
+                <v-btn @click="goToWishlist(wishlist.id)" small icon>
                   <v-icon>mdi-chevron-right</v-icon>
                 </v-btn>
               </v-list-item-action>
@@ -58,29 +58,35 @@ export default {
       loading: true,
 
       displayName: "",
-      groups: undefined,
-      wishlists: undefined
+      groups: {},
+      wishlists: {}
     }
   },
 
   methods: {
     async createNewWishlist() {
-      const newWishlistRef = await addDoc(collection(firebaseDB, "wishlists"), {
-        owner: this.userID
-      })
+      const wishlistData = {
+        owner: this.userID,
+        created: new Date().getTime(),
+        nickname: "Untitled Wishlist"
+      }
 
-      this.addWishlistRefrenceToUserDoc(newWishlistRef, new Date().getTime());
+      const newWishlistRef = await addDoc(collection(firebaseDB, "wishlists"), wishlistData);
+
+      this.addWishlistReferenceToUserDoc(newWishlistRef, wishlistData);
+
+      this.goToWishlist(newWishlistRef.id);
     },
 
-    async addWishlistRefrenceToUserDoc(ref, timestamp) {
-      const userDocRef = doc(firebaseDB, "users", this.userID);
+    async addWishlistReferenceToUserDoc(ref, data) {
+      const userRef = doc(firebaseDB, "users", this.userID);
 
-      await updateDoc(userDocRef, {
-        ['wishlists.' + `${timestamp}`]: {
-          wishlistID: ref.id,
-          path: ref.path,
-          createdOn: timestamp,
-          nickname: "Untitled Wishlist",
+      delete data.owner;
+
+      await updateDoc(userRef, {
+        ['wishlists.' + `${ref.id}`]: {
+          id: ref.id,
+          ...data
         }
       })
     },
@@ -97,30 +103,22 @@ export default {
   },
 
   created() {
-    setSnapshotListener("users", this.userID, document => {
-      let user = document.data();
-
-      this.displayName = user.displayName;
-      this.groups = user.groups;
-      this.wishlists = user.wishlists;
-
+    setSnapshotListener("users", this.userID, userDoc => {
+      const data = userDoc.data();
+      this.wishlists = data.wishlists;
 
       this.loading = false;
     })
   },
 
   destroyed() {
-    removeSnapshotListener("users", this.userID, document => {
-      let user = document.data();
+    removeSnapshotListener("users", this.userID, userDoc => {
+      const data = userDoc.data();
+      this.wishlists = data.wishlists;
 
-      this.displayName = user.displayName;
-      this.groups = user.groups;
-      this.wishlists = user.wishlists;
-      
       this.loading = false;
     })();
   }
-
 }
 </script>
 
