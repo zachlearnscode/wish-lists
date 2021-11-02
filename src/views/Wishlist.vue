@@ -1,7 +1,7 @@
 <template>
-  <v-container>
+  <div>
     <loader v-if="loading"></loader>
-    <div v-else>
+    <v-container v-else>
       <v-row>
         <v-col v-if="!editingName" class="d-flex justify-center align-center">
           <span class="text-h5 font-weight-light">{{wishlist.nickname}}</span>
@@ -22,18 +22,43 @@
         </v-col>
       </v-row>
       <v-row>
-        <v-btn
-          color="red lighten-2"
-          dark
-          @click="dialog = true"
-        >
-          Add Item
-        </v-btn>
+        <v-col             class="pt-0">
+          <v-btn
+            color="red lighten-2"
+            dark
+            block
+            @click="dialog = true"
+          >
+            Add Item
+          </v-btn>
+        </v-col>
         <add-item-dialog :wishlistID="wishlistID" :open="dialog" @exitDialog="$event ? processAddItem($event) : closeDialog()"></add-item-dialog>
       </v-row>
-      <v-row v-for="(item, i) in items" :key="i">{{ item.name }}</v-row>
-    </div>
-  </v-container>
+      <v-expansion-panels class="mt-3" multiple>
+        <v-expansion-panel v-for="(item, i) in items" :key="i">
+          <v-expansion-panel-header>
+            {{item.name}}
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-container>
+              <v-row>
+                <v-col cols="auto">Link:</v-col>
+                <v-col>{{item.link}}</v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="auto">Notes:</v-col>
+                <v-col>{{item.notes}}</v-col>
+              </v-row>
+              <v-row>
+                <v-col cols="auto">Priority:</v-col>
+                <v-col>{{ item.priority | convertPriority }}</v-col>
+              </v-row>
+            </v-container>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </v-container>
+  </div>
 </template>
 
 <script>
@@ -93,6 +118,27 @@ export default {
       })
 
       this.closeDialog();
+    }
+  },
+
+  filters: {
+    convertPriority(num) {
+      let result;
+
+      switch (num) {
+        case 0: 
+          result = "Low";
+          break;
+        case 1: 
+          result = "Normal";
+          break;
+        case 2: {
+          result = "High";
+          break;
+        }
+      }
+
+      return result;
     }
   },
 

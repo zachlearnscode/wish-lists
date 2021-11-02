@@ -1,56 +1,28 @@
 <template>
-  <v-container>
-    <loader :loading="loading"></loader>
-    <div v-if="!loading">
-      <v-card class="elevation-5">
-        <v-card-title class="green">
-          My Wishlists
-          <v-spacer></v-spacer>
-          <v-card-actions class="pa-0">
-            <v-btn @click="createNewWishlist" fab small><v-icon>mdi-plus</v-icon></v-btn>
-          </v-card-actions>
-        </v-card-title>
-        
-        <v-list two-line>
-          <template v-if="Object.keys(wishlists).length">
-            <v-list-item v-for="(wishlist, i) in wishlists" :key="i">
-              <v-list-item-content>
-                <v-list-item-title>{{ wishlist.nickname }}</v-list-item-title>
-                <v-list-item-subtitle>Created: {{ wishlist.created | formatDate }}</v-list-item-subtitle>                
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-btn @click="goToWishlist(wishlist.id)" small icon>
-                  <v-icon>mdi-chevron-right</v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>          
-          </template>
-          <template v-else>
-            <div class="text-center grey--text text--lighten-1">No wishlists to display.</div>
-          </template>
-        </v-list>        
-      </v-card>
+  <div>
+    <loader v-if="loading"></loader>
+    <div v-else>
+      <dashboard-list :title="'Wishlists'" :btnIcon="'plus-thick'" :list="wishlists"></dashboard-list>
+      <dashboard-list :title="'Groups'" :btnIcon="'account-plus'" :list="groups"></dashboard-list>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <script>
+//Firebase Imports
 import { firebaseDB, setSnapshotListeners } from "../main";
 import { doc, collection, addDoc, updateDoc } from "firebase/firestore";
 
-// const setSnapshotListener = function(collection, document, callback) {
-//   return onSnapshot(doc(firebaseDB, collection, document), callback);
-// };
-
-// const removeSnapshotListener = setSnapshotListener;
-
+//Component Imports
 import Loader from "../components/Loader.vue";
+import DashboardList from "../components/DashboardList.vue";
 
 export default {
   props: ['userID'],
 
   components: {
-    Loader
+    Loader,
+    DashboardList
   },
 
   data() {
