@@ -13,6 +13,7 @@ import VeeValidate from 'vee-validate';
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, collection, query, onSnapshot } from "firebase/firestore";
 
 export const firebaseConfig = {
   apiKey: "AIzaSyDhICVCsK3nkAhi-I_EZdbvfC-a4RxbmwM",
@@ -25,6 +26,20 @@ export const firebaseConfig = {
 
 initializeApp(firebaseConfig);
 export const firebaseDB = getFirestore();
+
+export const setSnapshotListeners = (arr) => {
+  arr.forEach(({path, snapshotQuery, callback}) => {
+    if (snapshotQuery) {
+      if (typeof snapshotQuery === "boolean") {
+        return onSnapshot(query(collection(firebaseDB, path)), callback);
+      } else {
+        return onSnapshot(query(collection(firebaseDB, path), snapshotQuery), callback);
+      }
+    }
+    
+    return onSnapshot(doc(firebaseDB, path), callback);
+  })
+};
 
 Vue.config.productionTip = false;
 

@@ -10,7 +10,7 @@
         <v-container>
           <v-row>
             <v-col>
-              <v-text-field required label="Item Name" v-model="name"> </v-text-field>
+              <v-text-field required label="Item Name" v-model="name" :error="error"> </v-text-field>
             </v-col>
           </v-row>
           <v-row>
@@ -46,7 +46,7 @@
         <v-btn color="error" text @click="[$emit('exitDialog'), clearInputs]">
           Cancel
         </v-btn>
-        <v-btn color="primary" text @click="[$emit('exitDialog', {name, link, notes, priority}), clearInputs]">
+        <v-btn color="primary" text @click="validateItem({name, link, notes, priority})">
           Save Item
         </v-btn>
       </v-card-actions>
@@ -55,8 +55,11 @@
 </template>
 
 <script>
+import { firebaseDB } from "../main";
+import { collection, query, where, getDocs} from "firebase/firestore";
+
 export default {
-  props: ["open"],
+  props: ["open", "wishlistID"],
 
   data() {
     return {
@@ -64,11 +67,25 @@ export default {
       link: "",
       notes: "",
       priority: 1,
-      priorityLabels: ["Low", "Normal", "High"]
+      priorityLabels: ["Low", "Normal", "High"],
+      error: false
     }
   },
 
   methods: {
+    async validateItem(item) {
+      const wishlistItemsSubcollectionRef = collection(firebaseDB, "wishlists", this.wishlistID, "items");
+      const wishlistItemsSubcollectionQuery = query(wishlistItemsSubcollectionRef, where("name", "==", item.name));
+
+      const querySnapshot = await getDocs(wishlistItemsSubcollectionQuery);
+
+      if (!querySnapshot.docs.length) {
+         this.$emit('exitDialog', item);
+         this.clearInputs();
+      } else {
+        this.error = true;
+      }
+    },
     clearInputs() {
       this.name = "";
       this.link = "";

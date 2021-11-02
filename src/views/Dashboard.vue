@@ -35,14 +35,14 @@
 </template>
 
 <script>
-import { firebaseDB } from "../main";
-import { doc, collection, addDoc, updateDoc, onSnapshot } from "firebase/firestore";
+import { firebaseDB, setSnapshotListeners } from "../main";
+import { doc, collection, addDoc, updateDoc } from "firebase/firestore";
 
-const setSnapshotListener = function(collection, document, callback) {
-  return onSnapshot(doc(firebaseDB, collection, document), callback);
-};
+// const setSnapshotListener = function(collection, document, callback) {
+//   return onSnapshot(doc(firebaseDB, collection, document), callback);
+// };
 
-const removeSnapshotListener = setSnapshotListener;
+// const removeSnapshotListener = setSnapshotListener;
 
 import Loader from "../components/Loader.vue";
 
@@ -91,8 +91,8 @@ export default {
       })
     },
 
-    goToWishlist(wishlistID) {
-      this.$router.push({ path: `/wishlist/${wishlistID}` });
+    goToWishlist(id) {
+      this.$router.push({ path: `/wishlist/${id}` });
     }
   },
 
@@ -103,22 +103,30 @@ export default {
   },
 
   created() {
-    setSnapshotListener("users", this.userID, userDoc => {
+    const pathToUserDoc = `users/${this.userID}`;
+    const userDocSnapshotCallback = userDoc => {
       const data = userDoc.data();
       this.wishlists = data.wishlists;
+    }
+    const userDocSnapshotArgs = {
+      path: pathToUserDoc,
+      snapshotQuery: false,
+      callback: userDocSnapshotCallback
+    }
 
-      this.loading = false;
-    })
+    setSnapshotListeners([userDocSnapshotArgs])
+
+    this.loading = false;
   },
 
-  destroyed() {
-    removeSnapshotListener("users", this.userID, userDoc => {
-      const data = userDoc.data();
-      this.wishlists = data.wishlists;
+  // destroyed() {
+  //   removeSnapshotListener("users", this.userID, userDoc => {
+  //     const data = userDoc.data();
+  //     this.wishlists = data.wishlists;
 
-      this.loading = false;
-    })();
-  }
+  //     this.loading = false;
+  //   })();
+  // }
 }
 </script>
 

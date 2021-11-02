@@ -29,7 +29,7 @@
         >
           Add Item
         </v-btn>
-        <add-item-dialog :open="dialog" @exitDialog="$event ? processAddItem($event) : closeDialog()"></add-item-dialog>
+        <add-item-dialog :wishlistID="wishlistID" :open="dialog" @exitDialog="$event ? processAddItem($event) : closeDialog()"></add-item-dialog>
       </v-row>
       <v-row v-for="(item, i) in items" :key="i">{{ item.name }}</v-row>
     </div>
@@ -40,14 +40,14 @@
 import Loader from "../components/Loader.vue";
 import AddItemDialog from "../components/AddItemDialog.vue";
 
-import { firebaseDB } from "../main";
-import { collection, getDocs, setDoc,  doc, updateDoc, onSnapshot, query } from "firebase/firestore";
+import { firebaseDB, setSnapshotListeners } from "../main";
+import { setDoc,  doc, updateDoc } from "firebase/firestore";
 
-const setSnapshotListener = function(collection, document, callback) {
-  return onSnapshot(doc(firebaseDB, collection, document), callback);
-};
+// const setSnapshotListener = function(collection, document, callback) {
+//   return onSnapshot(doc(firebaseDB, collection, document), callback);
+// };
 
-const removeSnapshotListener = setSnapshotListener;
+// const removeSnapshotListener = setSnapshotListener;
 
 export default {
   props: ["wishlistID"],
@@ -65,12 +65,14 @@ export default {
       editingName: false,
       wishlistNickname: "",
       items: [],
-      dialog: false
+      dialog: false,
+      snapshot: undefined
     }
   },
 
   methods: {
     async updateWishlistNickname() {
+      //TODO: Batch write to summary in User doc.
       const wishlistRef = doc(firebaseDB, "wishlists", this.wishlistID);
 
       await updateDoc(wishlistRef, {
@@ -80,21 +82,12 @@ export default {
       this.editingName = false;
       this.wishlistNickname = "";
     },
-    async getSubColleciton() {
-      const wishlistDocRef = doc(firebaseDB, "wishlists", this.wishlistID);
-      const querySnapshot = await getDocs(collection(wishlistDocRef, "items"));
-
-      querySnapshot.forEach((doc) => {
-        this.items.push(doc.data());
-      });
-    },
 
     closeDialog() {
       this.dialog = false;
     },
 
     async processAddItem(details) {
-
       await setDoc(doc(firebaseDB, "wishlists", this.wishlistID, "items", details.name), {
         ...details
       })
@@ -104,32 +97,41 @@ export default {
   },
 
   created() {
-    setSnapshotListener("wishlists", this.wishlistID, wishlistDoc => {
-      this.wishlist = wishlistDoc.data();
-      this.loading = false;
-    })
+    const pathToWishlistDoc = `wishlists/${this.wishlistID}`;
+    const wishlistDocSnapshotArgs = {
+      path: pathToWishlistDoc,
+      snapshotQuery: false,
+      callback: wishlistDoc => {
+        this.wishlist = wishlistDoc.data();
+      }
+    }
 
-    const itemsQuery = query(collection(firebaseDB, "wishlists", this.wishlistID, "items"))
+    const pathToItemsSubcollection = `wishlists/${this.wishlistID}/items`;
+    const itemsSubcollectionSnapshotArgs = {
+      path: pathToItemsSubcollection,
+      snapshotQuery: true,
+      callback: querySnapshot => {
+        let itemsInClient = this.items.map(i => i.name);
+        querySnapshot.forEach(doc => {
+          const item = doc.data();
+          if (!itemsInClient.includes(item.name)) {
+            this.items.push(item);
+          }
+        })
+        this.loading = false;
+      }
+    };
 
-    onSnapshot(itemsQuery, (querySnapshot) => {
-      querySnapshot.forEach(doc => {
-
-        if (!this.items.map(i => i.name).includes(doc.data().name)) {
-          this.items.push(doc.data())
-        }
-      })
-    })
-
-    
-  },
-
-  destroyed() {
-    removeSnapshotListener("wishlists", this.wishlistID, wishlistDoc => {
-      wishlistDoc.data();
-
-      this.loading = false;
-    })();
+    setSnapshotListeners([wishlistDocSnapshotArgs, itemsSubcollectionSnapshotArgs]);
   }
+
+  // destroyed() {
+  //   removeSnapshotListener("wishlists", this.wishlistID, wishlistDoc => {
+  //     wishlistDoc.data();
+
+  //     this.loading = false;
+  //   })();
+  // }
 
 }
 </script>
