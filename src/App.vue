@@ -15,7 +15,7 @@
         </v-list-item>
         <v-list-item link>
           <v-list-item-content>
-            <v-list-item-title>{{currentUser ? 'Sign Out' : 'Sign In'}}</v-list-item-title>
+            <v-list-item-title @click="signOutUser">{{currentUser ? 'Sign Out' : 'Sign In'}}</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -29,6 +29,7 @@
 
 <script>
 import { currentUser } from "../src/main";
+import { getAuth, signOut } from "firebase/auth";
 
 export default {
   name: "App",
@@ -40,5 +41,13 @@ export default {
       pages: ["Profile", "Wish List", "Pledges"]
     }
   },
+
+  methods: {
+    async signOutUser() {
+      await signOut(getAuth());
+
+      this.$router.push('/')
+    }
+  }
 };
 </script>

@@ -17,7 +17,7 @@ const routes = [
     path: "/",
     component: Login,
     beforeEnter: (to, from, next) => {
-      if (currentUser) next(`/dashboard/${currentUser.uid}`);
+      if (currentUser) next(`/dashboard`);
       else next();
     }
   },
@@ -27,9 +27,12 @@ const routes = [
     component: Login,
   },
   {
-    path: "/dashboard/:userID",
+    path: "/dashboard",
     component: Dashboard,
-    props: true
+    props: () => ({ userID: currentUser.uid }),
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: "/wishlist/:wishlistID",
@@ -41,5 +44,14 @@ const routes = [
 const router = new VueRouter({
   routes,
 });
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (currentUser) next()
+    else next('/')
+  } else {
+    next();
+  }
+})
 
 export default router;

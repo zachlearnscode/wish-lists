@@ -38,7 +38,7 @@ export default {
 
   methods: {
     async submit(btnID) {
-      let userCredential, user;
+      let userCredential;
       
       try {
         if (btnID === 'login') {
@@ -50,7 +50,7 @@ export default {
           console.log("Error submitting login/signup form: ", err);
       }
 
-      user = userCredential.user;
+      // user = userCredential.user;
 
       if (btnID === "signup") {
         updateProfile(getAuth().currentUser, {
@@ -62,7 +62,7 @@ export default {
         })
       }
 
-      return this.$router.push(`/dashboard/${user.uid}`);
+      return this.$router.push(`/dashboard`);
     },
     async writeNewUserToFirestore(user) {
       const db = getFirestore();
