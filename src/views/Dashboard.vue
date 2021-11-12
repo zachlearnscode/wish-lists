@@ -2,8 +2,12 @@
   <div>
     <loader v-if="loading"></loader>
     <div v-else>
-      <dashboard-list :title="'Wishlists'" :btnIcon="'plus-thick'" :list="wishlists"></dashboard-list>
-      <dashboard-list :title="'Groups'" :btnIcon="'account-plus'" :list="groups"></dashboard-list>
+      <dashboard-list :title="'Wishlists'" :btnIcon="'plus-thick'" :list="wishlists" :dialog="wishlistDialog" @action-button-click="wishlistDialog = true">
+		<template v-slot:actionDialog>
+			<create-wishlist-form @wishlist-form-submitted="[createNewWishlist($event), wishlistDialog = false]" @wishlist-form-cancelled="wishlistDialog=false"></create-wishlist-form>
+		</template>
+	  </dashboard-list>
+      <dashboard-list :title="'Groups'" :btnIcon="'account-plus'" :list="groups" :dialog="newGroupDialog" @action-button-click="newGroupDialog = true"></dashboard-list>
     </div>
   </div>
 </template>
@@ -16,13 +20,15 @@ import { doc, collection, addDoc, updateDoc } from "firebase/firestore";
 //Component Imports
 import Loader from "../components/Loader.vue";
 import DashboardList from "../components/DashboardList.vue";
+import CreateWishlistForm from "../components/CreateWishlistForm";
 
 export default {
   props: ['userID'],
 
   components: {
     Loader,
-    DashboardList
+    DashboardList,
+	CreateWishlistForm
   },
 
   data() {
@@ -31,23 +37,28 @@ export default {
 
       displayName: "",
       groups: {},
-      wishlists: {}
+      wishlists: {},
+	  
+	  wishlistDialog: false,
+	  newGroupDialog: false
     }
   },
 
   methods: {
-    async createNewWishlist() {
+    async createNewWishlist(nickname) {
       const wishlistData = {
         owner: this.userID,
         created: new Date().getTime(),
-        nickname: "Untitled Wishlist"
+        nickname: nickname
       }
 
       const newWishlistRef = await addDoc(collection(firebaseDB, "wishlists"), wishlistData);
+	  
+	  console.log(newWishlistRef)
 
       this.addWishlistReferenceToUserDoc(newWishlistRef, wishlistData);
 
-      this.goToWishlist(newWishlistRef.id);
+      //this.goToWishlist(newWishlistRef.id);
     },
 
     async addWishlistReferenceToUserDoc(ref, data) {

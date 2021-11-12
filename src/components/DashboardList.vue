@@ -6,9 +6,12 @@
         My {{title}}
         <v-spacer></v-spacer>
         <v-card-actions class="pa-0">
-          <v-btn @click="$emit('cardActionClick')" fab small>
+			<dashboard-list-action-dialog :dialog="dialog" :icon="btnIcon" v-on="$listeners">
+				<slot name="actionDialog"></slot>
+			</dashboard-list-action-dialog>
+          <!-- <v-btn @click="$emit('cardActionClick')" fab small>
             <v-icon>mdi-{{btnIcon}}</v-icon>
-          </v-btn>
+          </v-btn> -->
         </v-card-actions>
       </v-card-title>
 
@@ -21,9 +24,9 @@
               <v-list-item-subtitle>{{ item.created }}</v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
-              <v-btn @click="$emit('itemActionClick', item.id)" small icon>
+              <!-- <v-btn @click="$emit('itemActionClick', item.id)" small icon>
                 <v-icon>mdi-chevron-right</v-icon>
-              </v-btn>
+              </v-btn> -->
             </v-list-item-action>
           </v-list-item>
         </template>
@@ -36,8 +39,14 @@
 </template>
 
 <script>
+import DashboardListActionDialog from "./DashboardListActionDialog";
+
 export default {
-  props: ["title", "btnIcon", "list"]
+  props: ["title", "dialog", "btnIcon", "list"],
+  
+  components: {
+	DashboardListActionDialog
+  }
 };
 </script>
 

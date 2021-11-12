@@ -5,6 +5,7 @@ import VueRouter from "vue-router";
 import Login from "../views/Login.vue";
 import Dashboard from "../views/Dashboard.vue";
 import Wishlist from "../views/Wishlist.vue";
+import NewGroupOptions from "../views/NewGroupOptions.vue"
 
 
 //Firebase User
@@ -30,6 +31,14 @@ const routes = [
     path: "/dashboard",
     component: Dashboard,
     props: () => ({ userID: currentUser.uid }),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  {
+    path: "/dashboard/newgroup",
+    component: NewGroupOptions,
+    // props: () => ({ userID: currentUser.uid }),
     meta: {
       requiresAuth: true
     }
